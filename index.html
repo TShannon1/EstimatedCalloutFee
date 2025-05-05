@@ -139,7 +139,8 @@
   </script>
 
   <script async defer
-    src="https://maps.googleapis.com/maps/api/js?key=${{secrets.GOOGLE_API_KEY}}&libraries=places&callback=initAutocomplete">
+    src="https://maps.googleapis.com/maps/api/js?key=env:
+  GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}&libraries=places&callback=initAutocomplete">
   </script>
 </body>
 </html>
