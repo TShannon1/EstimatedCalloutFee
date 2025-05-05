@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Estimated Callout Fee</title>
   <style>
     body {
@@ -47,6 +47,12 @@
       font-style: italic;
       color: #555;
     }
+    #note {
+      margin-top: 10px;
+      font-size: 0.9rem;
+      text-align: center;
+      color: #666;
+    }
   </style>
 </head>
 <body>
@@ -56,18 +62,21 @@
   <button onclick="calculateTravelCost()">Calculate Callout Fee</button>
   <div id="loader"></div>
   <div id="result"></div>
+  <div id="note"><small>Note: This is an estimate based on return-trip distance from Hazelmere WA. Extra time or complexity may affect final pricing.</small></div>
 
   <script>
     const origin = "Hazelmere WA 6055";
     const freeDistanceKm = 2;
     const ratePerKm = 1.30;
+    const minCalloutFee = 15;
+    const maxCalloutFee = 150;
 
     function roundUpToNearest5(value) {
       return Math.ceil(value / 5) * 5;
     }
 
     function calculateTravelCost() {
-      const destination = document.getElementById("destination").value;
+      const destination = document.getElementById("destination").value.trim();
       const resultDiv = document.getElementById("result");
       const loader = document.getElementById("loader");
 
@@ -88,18 +97,34 @@
         unitSystem: google.maps.UnitSystem.METRIC
       }, function(response, status) {
         loader.innerText = "";
-        if (status !== google.maps.DistanceMatrixStatus.OK || !response.rows[0].elements[0].distance) {
-          resultDiv.innerText = "Sorry, we couldn't calculate the fee. Please check the suburb or try again.";
-        } else {
-          const distanceKm = parseFloat(response.rows[0].elements[0].distance.text.replace(/ km/, ""));
-          const roundTripKm = distanceKm * 2;
+        if (
+          status !== google.maps.DistanceMatrixStatus.OK ||
+          !response.rows[0].elements[0].distance ||
+          response.rows[0].elements[0].status !== "OK"
+        ) {
+          resultDiv.innerText = "Sorry, we couldn't calculate the fee. Please check the suburb and try again.";
+          return;
+        }
 
-          if (roundTripKm <= freeDistanceKm) {
-            resultDiv.innerText = `Estimated Callout Fee: $0 (You're in the free callout area)`;
-          } else {
-            const cost = roundUpToNearest5(roundTripKm * ratePerKm);
-            resultDiv.innerText = `Estimated Callout Fee: $${cost}`;
-          }
+        const distanceValue = response.rows[0].elements[0].distance.value; // in meters
+        const distanceKm = distanceValue / 1000;
+        const roundTripKm = distanceKm * 2;
+
+        console.log(`[DEBUG] One-way distance: ${distanceKm.toFixed(2)} km`);
+        console.log(`[DEBUG] Round-trip: ${roundTripKm.toFixed(2)} km`);
+
+        if (roundTripKm <= freeDistanceKm) {
+          resultDiv.innerText = `Estimated Callout Fee: $0 (You're in the free callout area)`;
+        } else {
+          const rawCost = roundTripKm * ratePerKm;
+          const roundedCost = roundUpToNearest5(rawCost);
+          const finalCost = Math.max(minCalloutFee, Math.min(roundedCost, maxCalloutFee));
+
+          console.log(`[DEBUG] Raw cost: $${rawCost.toFixed(2)}`);
+          console.log(`[DEBUG] Rounded: $${roundedCost}`);
+          console.log(`[DEBUG] Final callout fee: $${finalCost}`);
+
+          resultDiv.innerText = `Estimated Callout Fee: $${finalCost}`;
         }
       });
     }
