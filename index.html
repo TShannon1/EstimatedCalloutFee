@@ -62,13 +62,16 @@
   <button onclick="calculateTravelCost()">Calculate Callout Fee</button>
   <div id="loader"></div>
   <div id="result"></div>
-  <div id="note"><small>Note: This is an estimate based on return-trip distance from Hazelmere WA. Extra time or complexity may affect final pricing.</small></div>
+  <div id="note">
+    <small>Note: This is an estimate based on return-trip distance from Hazelmere WA. Extra time or complexity may affect final pricing.</small>
+  </div>
 
   <script>
     const origin = "Hazelmere WA 6055";
     const freeDistanceKm = 2;
     const ratePerKm = 1.30;
     const minCalloutFee = 15;
+    const maxCalloutFee = 150;
 
     function roundUpToNearest5(value) {
       return Math.ceil(value / 5) * 5;
@@ -96,8 +99,9 @@
         unitSystem: google.maps.UnitSystem.METRIC
       }, function(response, status) {
         loader.innerText = "";
+
         if (
-          status !== google.maps.DistanceMatrixStatus.OK ||
+          status !== "OK" ||
           !response.rows[0].elements[0].distance ||
           response.rows[0].elements[0].status !== "OK"
         ) {
@@ -105,25 +109,17 @@
           return;
         }
 
-        const distanceValue = response.rows[0].elements[0].distance.value; // in meters
-        const distanceKm = distanceValue / 1000;
+        const distanceMeters = response.rows[0].elements[0].distance.value;
+        const distanceKm = distanceMeters / 1000;
         const roundTripKm = distanceKm * 2;
 
-        console.log([DEBUG] One-way distance: ${distanceKm.toFixed(2)} km);
-        console.log([DEBUG] Round-trip: ${roundTripKm.toFixed(2)} km);
-
         if (roundTripKm <= freeDistanceKm) {
-          resultDiv.innerText = Estimated Callout Fee: $0 (You're in the free callout area);
+          resultDiv.innerText = "Estimated Callout Fee: $0 (You're in the free callout area)";
         } else {
           const rawCost = roundTripKm * ratePerKm;
           const roundedCost = roundUpToNearest5(rawCost);
           const finalCost = Math.max(minCalloutFee, Math.min(roundedCost, maxCalloutFee));
-
-          console.log([DEBUG] Raw cost: $${rawCost.toFixed(2)});
-          console.log([DEBUG] Rounded: $${roundedCost});
-          console.log([DEBUG] Final callout fee: $${finalCost});
-
-          resultDiv.innerText = Estimated Callout Fee: $${finalCost};
+          resultDiv.innerText = `Estimated Callout Fee: $${finalCost}`;
         }
       });
     }
@@ -138,7 +134,7 @@
   </script>
 
   <script async defer
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB9gyrNFkS-61b8XRBITX3olu2Oo4SvsM4&libraries=places&callback=initAutocomplete">
+    src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY_HERE&libraries=places&callback=initAutocomplete">
   </script>
 </body>
 </html>
