@@ -3,6 +3,11 @@ function calculateTravelCost() {
   const resultDiv = document.getElementById("result");
   const loader = document.getElementById("loader");
 
+  const origin = "Hazelmere WA 6055";
+  const freeDistanceKm = 2;
+  const ratePerKm = 1.30;
+  const minCalloutFee = 15;
+
   resultDiv.innerText = "";
   loader.innerText = "Calculating... Please wait.";
 
@@ -13,7 +18,7 @@ function calculateTravelCost() {
   }
 
   const geocoder = new google.maps.Geocoder();
-  geocoder.geocode({ address: destination }, function(geoResults, geoStatus) {
+  geocoder.geocode({ address: destination }, function (geoResults, geoStatus) {
     if (geoStatus !== "OK" || !geoResults || geoResults.length === 0) {
       loader.innerText = "";
       resultDiv.innerText = "Unable to determine the location. Please check the address and try again.";
@@ -36,10 +41,10 @@ function calculateTravelCost() {
       destinations: [destination],
       travelMode: google.maps.TravelMode.DRIVING,
       unitSystem: google.maps.UnitSystem.METRIC
-    }, function(response, status) {
+    }, function (response, status) {
       loader.innerText = "";
       if (
-        status !== google.maps.DistanceMatrixStatus.OK ||
+        status !== "OK" ||
         !response.rows[0].elements[0].distance ||
         response.rows[0].elements[0].status !== "OK"
       ) {
