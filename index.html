@@ -1,43 +1,90 @@
-<script>
-  const origin = "Hazelmere WA 6055";
-  const freeDistanceKm = 2;
-  const ratePerKm = 1.30;
-  const minCalloutFee = 15;
-  const maxCalloutFee = 150;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Estimated Callout Fee</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f4f8;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+    h1 {
+      color: #2c3e50;
+      text-align: center;
+    }
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      font-size: 1rem;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    #result {
+      margin-top: 20px;
+      font-weight: bold;
+      text-align: center;
+    }
+    #loader {
+      text-align: center;
+      margin-top: 20px;
+      font-style: italic;
+      color: #555;
+    }
+    #note {
+      margin-top: 10px;
+      font-size: 0.9rem;
+      text-align: center;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <h1>Estimated Callout Fee</h1>
+  <p>Enter your suburb or postcode to estimate the callout fee for onsite tech support.</p>
+  <input type="text" id="destination" placeholder="e.g., Midland, 6056" required>
+  <button onclick="calculateTravelCost()">Calculate Callout Fee</button>
+  <div id="loader"></div>
+  <div id="result"></div>
+  <div id="note"><small>Note: This is an estimate based on return-trip distance from Hazelmere WA. Extra time or complexity may affect final pricing.</small></div>
 
-  function roundUpToNearest5(value) {
-    return Math.ceil(value / 5) * 5;
-  }
+  <script>
+    const origin = "Hazelmere WA 6055";
+    const freeDistanceKm = 2;
+    const ratePerKm = 1.30;
+    const minCalloutFee = 15;
 
-  function calculateTravelCost() {
-    const destination = document.getElementById("destination").value.trim();
-    const resultDiv = document.getElementById("result");
-    const loader = document.getElementById("loader");
-
-    resultDiv.innerText = "";
-    loader.innerText = "Calculating... Please wait.";
-
-    if (!destination) {
-      loader.innerText = "";
-      resultDiv.innerText = "Please enter a valid suburb or postcode.";
-      return;
+    function roundUpToNearest5(value) {
+      return Math.ceil(value / 5) * 5;
     }
 
-    const geocoder = new google.maps.Geocoder();
-    geocoder.geocode({ address: destination }, function(geoResults, geoStatus) {
-      if (geoStatus !== "OK" || !geoResults || geoResults.length === 0) {
-        loader.innerText = "";
-        resultDiv.innerText = "Unable to determine the location. Please check the address and try again.";
-        return;
-      }
+    function calculateTravelCost() {
+      const destination = document.getElementById("destination").value.trim();
+      const resultDiv = document.getElementById("result");
+      const loader = document.getElementById("loader");
 
-      const components = geoResults[0].address_components;
-      const stateComponent = components.find(c => c.types.includes("administrative_area_level_1"));
-      const stateShortName = stateComponent ? stateComponent.short_name : "";
+      resultDiv.innerText = "";
+      loader.innerText = "Calculating... Please wait.";
 
-      if (stateShortName !== "WA") {
+      if (!destination) {
         loader.innerText = "";
-        resultDiv.innerText = "Destination is outside Western Australia. Please contact tony@tonystechsupport.com for a quote.";
+        resultDiv.innerText = "Please enter a valid suburb or postcode.";
         return;
       }
 
@@ -49,7 +96,6 @@
         unitSystem: google.maps.UnitSystem.METRIC
       }, function(response, status) {
         loader.innerText = "";
-
         if (
           status !== google.maps.DistanceMatrixStatus.OK ||
           !response.rows[0].elements[0].distance ||
@@ -59,35 +105,40 @@
           return;
         }
 
-        const distanceValue = response.rows[0].elements[0].distance.value;
+        const distanceValue = response.rows[0].elements[0].distance.value; // in meters
         const distanceKm = distanceValue / 1000;
         const roundTripKm = distanceKm * 2;
 
-        console.log(`[DEBUG] One-way distance: ${distanceKm.toFixed(2)} km`);
-        console.log(`[DEBUG] Round-trip: ${roundTripKm.toFixed(2)} km`);
+        console.log([DEBUG] One-way distance: ${distanceKm.toFixed(2)} km);
+        console.log([DEBUG] Round-trip: ${roundTripKm.toFixed(2)} km);
 
         if (roundTripKm <= freeDistanceKm) {
-          resultDiv.innerText = "Estimated Callout Fee: $0 (You're in the free callout area)";
+          resultDiv.innerText = Estimated Callout Fee: $0 (You're in the free callout area);
         } else {
           const rawCost = roundTripKm * ratePerKm;
           const roundedCost = roundUpToNearest5(rawCost);
           const finalCost = Math.max(minCalloutFee, Math.min(roundedCost, maxCalloutFee));
 
-          console.log(`[DEBUG] Raw cost: $${rawCost.toFixed(2)}`);
-          console.log(`[DEBUG] Rounded: $${roundedCost}`);
-          console.log(`[DEBUG] Final callout fee: $${finalCost}`);
+          console.log([DEBUG] Raw cost: $${rawCost.toFixed(2)});
+          console.log([DEBUG] Rounded: $${roundedCost});
+          console.log([DEBUG] Final callout fee: $${finalCost});
 
-          resultDiv.innerText = `Estimated Callout Fee: $${finalCost}`;
+          resultDiv.innerText = Estimated Callout Fee: $${finalCost};
         }
       });
-    });
-  }
+    }
 
-  function initAutocomplete() {
-    const input = document.getElementById("destination");
-    const autocomplete = new google.maps.places.Autocomplete(input, {
-      types: ["(regions)"]
-    });
-    autocomplete.setComponentRestrictions({ country: ["au"] });
-  }
-</script>
+    function initAutocomplete() {
+      const input = document.getElementById("destination");
+      const autocomplete = new google.maps.places.Autocomplete(input, {
+        types: ["(regions)"]
+      });
+      autocomplete.setComponentRestrictions({ country: ["au"] });
+    }
+  </script>
+
+  <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB9gyrNFkS-61b8XRBITX3olu2Oo4SvsM4&libraries=places&callback=initAutocomplete">
+  </script>
+</body>
+</html>
