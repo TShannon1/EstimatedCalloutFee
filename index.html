@@ -63,15 +63,14 @@
   <div id="loader"></div>
   <div id="result"></div>
   <div id="note">
-    <small>Note: This is an estimate based on return-trip distance from Hazelmere WA. Extra time or complexity may affect final pricing.</small>
+    <small>Please Note: This tool provides an estimated callout fee based on round-trip travel from Hazelmere, WA. On-site support is billed separately at $90 per hour (or part thereof). Actual fees may vary based on location, time, or complexity.</small>
   </div>
 
   <script>
     const origin = "Hazelmere WA 6055";
     const freeDistanceKm = 2;
-    const ratePerKm = 1.30;
-    const minCalloutFee = 15;
-    const maxCalloutFee = 150;
+    const ratePerKm = 1.45;
+    const minCalloutFee = 10;
 
     function roundUpToNearest5(value) {
       return Math.ceil(value / 5) * 5;
@@ -118,7 +117,7 @@
         } else {
           const rawCost = roundTripKm * ratePerKm;
           const roundedCost = roundUpToNearest5(rawCost);
-          const finalCost = Math.max(minCalloutFee, Math.min(roundedCost, maxCalloutFee));
+          const finalCost = Math.max(minCalloutFee, roundedCost);
           resultDiv.innerText = `Estimated Callout Fee: $${finalCost}`;
         }
       });
