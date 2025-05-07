@@ -56,7 +56,7 @@ function calculateTravelCost() {
       } else {
         const rawCost = roundTripKm * ratePerKm;
         const roundedCost = roundUpToNearest5(rawCost);
-        const finalCost = Math.max(minCalloutFee, Math.min(roundedCost, maxCalloutFee));
+        const finalCost = Math.max(minCalloutFee, roundedCost);
         resultDiv.innerText = `Estimated Callout Fee: $${finalCost}`;
       }
     });
